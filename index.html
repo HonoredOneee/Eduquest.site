@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EduQuest – Gamifique sua preparação para o ENEM</title>
+  <meta name="description" content="EduQuest: plataforma gamificada de apoio ao ENEM. Quiz por IA, streak diário e conquistas para manter você motivado!" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
+
+  <!-- Google Fonts: Montserrat para títulos, Roboto para texto -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            blackBg: '#000000',
+            darkGray: '#121212',
+            lightGray: '#1E1E1E',
+            accentPurple: '#9C27B0',
+            textWhite: '#FFFFFF',
+            textGray: '#C5C5C7'
+          },
+          fontFamily: {
+            heading: ['Montserrat', 'sans-serif'],
+            body: ['Roboto', 'sans-serif']
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            slideInLeft: {
+              '0%': { opacity: '0', transform: 'translateX(-50px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' }
+            },
+            slideInRight: {
+              '0%': { opacity: '0', transform: 'translateX(50px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' }
+            },
+            zoomIn: {
+              '0%': { opacity: '0', transform: 'scale(0.8)' },
+              '100%': { opacity: '1', transform: 'scale(1)' }
+            }
+          },
+          animation: {
+            fadeIn: 'fadeIn 0.8s ease-out forwards',
+            slideInLeft: 'slideInLeft 0.8s ease-out forwards',
+            slideInRight: 'slideInRight 0.8s ease-out forwards',
+            zoomIn: 'zoomIn 0.8s ease-out forwards'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Altura fixa para depoimentos, evitando vazamento */
+    .depoimentos-container {
+      position: relative;
+      height: 280px;
+      overflow: hidden;
+    }
+
+    /* Cada slide ocupa toda a área e fica centralizado */
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: opacity 0.5s ease;
+      opacity: 0;
+    }
+    .slide.active {
+      opacity: 1;
+    }
+
+    /* Scroll-triggered */
+    .scroll-anim {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .scroll-anim.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="bg-blackBg text-textWhite font-body">
+
+  <!-- ======================================
+       1. HEADER (Navbar com blur leve e centralizada)
+       ====================================== -->
+  <header class="w-full fixed top-0 left-0 z-50 bg-blackBg/50 backdrop-blur-sm transition-colors duration-500">
+    <div class="max-w-6xl mx-auto flex items-center justify-between px-4 py-3 md:px-6 md:py-4">
+      <!-- Logo -->
+      <a href="#home" class="flex items-center space-x-2 group">
+        <img src="assets/images/logo-eduquest.png" alt="Logo EduQuest" class="h-8 w-auto transition-transform duration-300 group-hover:scale-105" />
+        <span class="text-xl md:text-2xl font-heading text-textWhite transition-colors duration-300 group-hover:text-accentPurple">EduQuest</span>
+      </a>
+
+      <!-- Links Desktop (oculto em mobile) -->
+      <nav class="hidden md:flex space-x-8 text-base md:text-lg font-medium">
+        <a href="#home" class="relative group">
+          <span class="hover:text-accentPurple transition-colors">Home</span>
+          <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-accentPurple transition-all group-hover:w-full"></span>
+        </a>
+        <a href="#funcionalidades" class="relative group">
+          <span class="hover:text-accentPurple transition-colors">Funcionalidades</span>
+          <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-accentPurple transition-all group-hover:w-full"></span>
+        </a>
+        <a href="#sobre" class="relative group">
+          <span class="hover:text-accentPurple transition-colors">Sobre</span>
+          <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-accentPurple transition-all group-hover:w-full"></span>
+        </a>
+        <a href="#depoimentos" class="relative group">
+          <span class="hover:text-accentPurple transition-colors">Depoimentos</span>
+          <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-accentPurple transition-all group-hover:w-full"></span>
+        </a>
+        <a href="#download" class="relative group">
+          <span class="hover:text-accentPurple transition-colors">Download</span>
+          <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-accentPurple transition-all group-hover:w-full"></span>
+        </a>
+        <a href="#contato" class="relative group">
+          <span class="hover:text-accentPurple transition-colors">Contato</span>
+          <span class="absolute left-0 bottom-0 w-0 h-0.5 bg-accentPurple transition-all group-hover:w-full"></span>
+        </a>
+      </nav>
+
+      <!-- Botão Mobile -->
+      <button id="btn-mobile-menu" class="md:hidden focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-textWhite" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Menu Mobile (inicialmente oculto) -->
+    <div id="mobile-menu" class="hidden bg-darkGray text-textWhite transition-opacity duration-300 opacity-0">
+      <nav class="flex flex-col px-4 py-4 space-y-4 text-base font-medium">
+        <a href="#home" class="hover:text-accentPurple transition-colors">Home</a>
+        <a href="#funcionalidades" class="hover:text-accentPurple transition-colors">Funcionalidades</a>
+        <a href="#sobre" class="hover:text-accentPurple transition-colors">Sobre</a>
+        <a href="#depoimentos" class="hover:text-accentPurple transition-colors">Depoimentos</a>
+        <a href="#download" class="hover:text-accentPurple transition-colors">Download</a>
+        <a href="#contato" class="hover:text-accentPurple transition-colors">Contato</a>
+      </nav>
+    </div>
+  </header>
+
+
+  <!-- ======================================
+       2. HOME / HERO SECTION (COM BACKGROUND + PARALLAX + BLUR)
+       ====================================== -->
+  <section
+    id="home"
+    class="relative min-h-screen flex items-center justify-center px-4 md:px-0 pt-20 md:pt-24 overflow-hidden"
+    style="background-image: url('assets/images/hero-bg.jpg'); background-size: cover; background-position: center;"
+  >
+    <!-- Overlay escuro + blur -->
+    <div class="absolute inset-0 bg-blackBg/50 backdrop-blur-lg"></div>
+
+    <!-- Efeito parallax simples -->
+    <div id="parallax-bg" class="absolute inset-0 bg-cover bg-center" style="background-image: url('assets/images/hero-bg.jpg'); transform: translateY(0);"></div>
+
+    <!-- Conteúdo sobre o overlay -->
+    <div class="relative z-10 max-w-3xl text-center">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-bold mb-4 leading-tight text-textWhite scroll-anim">
+        Gamifique sua preparação para o ENEM
+      </h1>
+      <p class="text-base sm:text-lg md:text-xl text-textGray mb-6 scroll-anim delay-200">
+        Questões geradas por IA, streak diário e conquistas para manter você motivado. Estude de forma dinâmica e divertida!
+      </p>
+      <div class="flex flex-col sm:flex-row sm:justify-center sm:space-x-6 space-y-4 sm:space-y-0">
+        <a
+          href="#download"
+          class="px-6 py-3 sm:px-8 sm:py-4 bg-accentPurple text-textWhite text-base sm:text-lg font-semibold rounded-lg shadow-lg hover:bg-purple-700 transform hover:scale-105 transition-transform duration-300 scroll-anim delay-400"
+        >
+          Baixe o App Gratuitamente
+        </a>
+        <a
+          href="#sobre"
+          class="px-6 py-3 sm:px-8 sm:py-4 border border-accentPurple text-accentPurple text-base sm:text-lg font-semibold rounded-lg hover:bg-accentPurple hover:text-textWhite transform hover:scale-105 transition-transform duration-300 scroll-anim delay-600"
+        >
+          Saiba Mais
+        </a>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ======================================
+       3. DESTAQUES RÁPIDOS (3 CARDS) COM ANIMAÇÃO 3D SUBTIL
+       ====================================== -->
+  <section class="py-16 md:py-20 lg:py-24 bg-darkGray/75 px-4">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+        <!-- Card 1 -->
+        <div class="bg-blackBg/70 rounded-2xl shadow-lg p-6 sm:p-8 lg:p-10 flex flex-col items-center text-center hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1 hover:scale-105 scroll-anim">
+          <img src="assets/images/icon-ia.png" alt="Ícone IA" class="h-10 sm:h-12 mb-3 sm:mb-4 transition-transform duration-300 hover:scale-110" />
+          <h3 class="text-xl sm:text-2xl font-heading font-semibold mb-2 text-textWhite">Questões ENEM em tempo real</h3>
+          <p class="text-textGray text-sm sm:text-base">Perguntas geradas por Inteligência Artificial no estilo ENEM, com nível ajustável.</p>
+        </div>
+
+        <!-- Card 2 (foquinho estático em vez de Lottie) -->
+        <div class="bg-blackBg/70 rounded-2xl shadow-lg p-6 sm:p-8 lg:p-10 flex flex-col items-center text-center hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1 hover:scale-105 scroll-anim delay-200">
+          <img src="assets/images/static-fire.png" alt="Foguinho" class="h-10 w-10 mb-2 transition-transform duration-300 hover:rotate-12" />
+          <h3 class="text-xl sm:text-2xl font-heading font-semibold mb-2 text-textWhite mt-2">Foquinho da Disciplina</h3>
+          <p class="text-textGray text-sm sm:text-base">Acompanhe seu streak diário ao responder questões e ganhe pontos para subir de nível.</p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-blackBg/70 rounded-2xl shadow-lg p-6 sm:p-8 lg:p-10 flex flex-col items-center text-center hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1 hover:scale-105 scroll-anim delay-400">
+          <img src="assets/images/icon-badge.png" alt="Ícone de Conquista" class="h-10 sm:h-12 mb-3 sm:mb-4 transition-transform duration-300 hover:scale-110" />
+          <h3 class="text-xl sm:text-2xl font-heading font-semibold mb-2 text-textWhite">Conquistas e badges</h3>
+          <p class="text-textGray text-sm sm:text-base">Desbloqueie badges como “10 questões completas”, “7 dias de streak” e muito mais.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ======================================
+       4. FUNCIONALIDADES COM SLIDE-IN E ZOOM-IN
+       ====================================== -->
+  <section id="funcionalidades" class="py-16 md:py-20 lg:py-24 bg-blackBg/75 px-4">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-center mb-12 text-textWhite scroll-anim">Funcionalidades</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+        <!-- Quiz Dinâmico por IA (slide in left) -->
+        <div class="space-y-4 scroll-anim" style="animation: slideInLeft 0.8s ease-out forwards;">
+          <h3 class="text-xl sm:text-2xl md:text-3xl font-heading font-semibold text-textWhite">Quiz Dinâmico por IA</h3>
+          <p class="text-textGray text-sm sm:text-base md:text-lg">Geramos questões estilo ENEM com parâmetros ajustáveis: matéria, dificuldade e quantidade. As alternativas são embaralhadas a cada execução, garantindo que você pratique de forma dinâmica.</p>
+          <div class="w-full flex justify-center">
+            <img src="assets/images/hero-student.png" alt="Mockup quiz IA" class="rounded-lg shadow-md max-w-xs sm:max-w-sm md:max-w-md transform hover:scale-105 transition-transform duration-500" loading="lazy" />
+          </div>
+        </div>
+
+        <!-- Sistema de Progressão (slide in right) -->
+        <div class="space-y-4 scroll-anim delay-200" style="animation: slideInRight 0.8s ease-out forwards;">
+          <h3 class="text-xl sm:text-2xl md:text-3xl font-heading font-semibold text-textWhite">Sistema de Progressão: Foquinho da Disciplina</h3>
+          <p class="text-textGray text-sm sm:text-base md:text-lg">Cada dia que você responde, mantém seu streak. A cada 3 acertos, você sobe 1 nível na disciplina. Confira abaixo um exemplo de cálculo de níveis:</p>
+          <ul class="list-disc list-inside text-textGray text-sm sm:text-base md:text-lg">
+            <li>3 acertos diários = 1 nível</li>
+            <li>10 acertos acumulados = Badge “10 Questões Completas”</li>
+            <li>7 dias ininterruptos = Badge “Streak de 7 Dias”</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Conquistas e Gamificação (zoom-in) -->
+      <div class="mt-16 lg:mt-24">
+        <h3 class="text-2xl sm:text-3xl md:text-4xl font-heading font-semibold text-center mb-8 text-textWhite scroll-anim">Conquistas e Gamificação</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+          <!-- Badge 1 -->
+          <div class="bg-lightGray/70 rounded-2xl shadow p-4 sm:p-6 flex flex-col items-center text-center scroll-anim" style="animation: zoomIn 0.8s ease-out forwards;">
+            <img src="assets/images/icon-badge1.png" alt="Badge 10 questões" class="h-10 sm:h-12 mb-4 transition-transform duration-300 hover:scale-110" loading="lazy" />
+            <p class="font-medium text-textWhite text-sm sm:text-base">10 questões completas</p>
+          </div>
+          <!-- Badge 2 -->
+          <div class="bg-lightGray/70 rounded-2xl shadow p-4 sm:p-6 flex flex-col items-center text-center scroll-anim delay-200" style="animation: zoomIn 0.8s ease-out 0.2s forwards;">
+            <img src="assets/images/icon-badge2.png" alt="Badge 7 dias streak" class="h-10 sm:h-12 mb-4 transition-transform duration-300 hover:scale-110" loading="lazy" />
+            <p class="font-medium text-textWhite text-sm sm:text-base">7 dias de streak</p>
+          </div>
+          <!-- Badge 3 -->
+          <div class="bg-lightGray/70 rounded-2xl shadow p-4 sm:p-6 flex flex-col items-center text-center scroll-anim delay-400" style="animation: zoomIn 0.8s ease-out 0.4s forwards;">
+            <img src="assets/images/icon-badge3.png" alt="Badge mente rápida" class="h-10 sm:h-12 mb-4 transition-transform duration-300 hover:scale-110" loading="lazy" />
+            <p class="font-medium text-textWhite text-sm sm:text-base">Mente Rápida</p>
+          </div>
+          <!-- Badge 4 -->
+          <div class="bg-lightGray/70 rounded-2xl shadow p-4 sm:p-6 flex flex-col items-center text-center scroll-anim delay-600" style="animation: zoomIn 0.8s ease-out 0.6s forwards;">
+            <img src="assets/images/icon-badge4.png" alt="Badge aniversariante" class="h-10 sm:h-12 mb-4 transition-transform duration-300 hover:scale-110" loading="lazy" />
+            <p class="font-medium text-textWhite text-sm sm:text-base">Aniversariante do mês</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ======================================
+       5. SOBRE
+       ====================================== -->
+  <section id="sobre" class="py-16 md:py-20 lg:py-24 bg-darkGray/75 px-4">
+    <div class="max-w-6xl mx-auto">
+      <!-- Nossa Missão -->
+      <div class="text-center mb-12 scroll-anim">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-textWhite mb-4">Nossa Missão</h2>
+        <p class="text-textGray text-sm sm:text-base md:text-lg max-w-2xl mx-auto">
+          Democratizar o acesso a um estudo de qualidade para o ENEM, tornando o processo de preparação mais engajador e eficiente por meio da gamificação.
+        </p>
+      </div>
+
+      <!-- Como Funciona (Infográfico) -->
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-6 items-center mb-12">
+        <!-- Passo 1 -->
+        <div class="flex flex-col items-center text-center scroll-anim">
+          <div class="bg-accentPurple text-textWhite p-3 sm:p-4 rounded-full mb-2">
+            <span class="text-lg sm:text-xl font-heading">1</span>
+          </div>
+          <p class="font-medium text-textWhite text-sm sm:text-base">Onboarding</p>
+        </div>
+        <!-- Seta -->
+        <div class="flex justify-center scroll-anim delay-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-textGray" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+        <!-- Passo 2 -->
+        <div class="flex flex-col items-center text-center scroll-anim delay-400">
+          <div class="bg-accentPurple text-textWhite p-3 sm:p-4 rounded-full mb-2">
+            <span class="text-lg sm:text-xl font-heading">2</span>
+          </div>
+          <p class="font-medium text-textWhite text-sm sm:text-base">Estudo Diário</p>
+        </div>
+        <!-- Seta -->
+        <div class="flex justify-center scroll-anim delay-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-textGray" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+        <!-- Passo 3 -->
+        <div class="flex flex-col items-center text-center scroll-anim delay-800">
+          <div class="bg-accentPurple text-textWhite p-3 sm:p-4 rounded-full mb-2">
+            <span class="text-lg sm:text-xl font-heading">3</span>
+          </div>
+          <p class="font-medium text-textWhite text-sm sm:text-base">Progresso & Conquistas</p>
+        </div>
+      </div>
+
+      <!-- Equipe & Parceiros (5 pessoas) -->
+      <div class="space-y-8">
+        <h3 class="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-center text-textWhite mb-6 scroll-anim">Equipe & Parceiros</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 md:gap-8 text-center">
+          <!-- Membro 1 -->
+          <div class="space-y-2 scroll-anim delay-200">
+            <img src="assets/images/depoimento1.png" alt="Membro 1" class="rounded-full h-20 w-20 sm:h-24 sm:w-24 mx-auto object-cover" loading="lazy" />
+            <p class="font-medium text-textWhite text-sm sm:text-base">Marcos Aurelio<br/><span class="text-textGray text-xs sm:text-sm">CEO & Fundador</span></p>
+          </div>
+          <!-- Membro 2 -->
+          <div class="space-y-2 scroll-anim delay-400">
+            <img src="assets/images/depoimento2.png" alt="Membro 2" class="rounded-full h-20 w-20 sm:h-24 sm:w-24 mx-auto object-cover" loading="lazy" />
+            <p class="font-medium text-textWhite text-sm sm:text-base">Gabryele Crivelli<br/><span class="text-textGray text-xs sm:text-sm">CTO & Co-fundadora</span></p>
+          </div>
+          <!-- Membro 3 -->
+          <div class="space-y-2 scroll-anim delay-600">
+            <img src="assets/images/depoimento3.png" alt="Membro 3" class="rounded-full h-20 w-20 sm:h-24 sm:w-24 mx-auto object-cover" loading="lazy" />
+            <p class="font-medium text-textWhite text-sm sm:text-base">Hillary Tayla<br/><span class="text-textGray text-xs sm:text-sm">Lead de Produto</span></p>
+          </div>
+          <!-- Membro 4 -->
+          <div class="space-y-2 scroll-anim delay-800">
+            <img src="assets/images/depoimento4.png" alt="Membro 4" class="rounded-full h-20 w-20 sm:h-24 sm:w-24 mx-auto object-cover" loading="lazy" />
+            <p class="font-medium text-textWhite text-sm sm:text-base">Mateus Andrade<br/><span class="text-textGray text-xs sm:text-sm">Design Gráfico</span></p>
+          </div>
+          <!-- Membro 5 -->
+          <div class="space-y-2 scroll-anim delay-1000">
+            <img src="assets/images/depoimento5.png" alt="Membro 5" class="rounded-full h-20 w-20 sm:h-24 sm:w-24 mx-auto object-cover" loading="lazy" />
+            <p class="font-medium text-textWhite text-sm sm:text-base">João Pedro<br/><span class="text-textGray text-xs sm:text-sm">Marketing & Suporte</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ======================================
+       6. DEPOIMENTOS
+       ====================================== -->
+  <section id="depoimentos" class="py-16 md:py-20 lg:py-24 bg-blackBg/75 px-4">
+    <div class="max-w-6xl mx-auto text-center">
+      <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading font-bold mb-8 text-textWhite scroll-anim">Depoimentos</h2>
+
+      <!-- Contêiner para os slides -->
+      <div class="depoimentos-container max-w-2xl mx-auto">
+        <!-- Slide 1 -->
+        <div class="slide active">
+          <img src="assets/images/depoimento1.jpg" alt="Estudante 1" class="h-20 w-20 sm:h-24 sm:w-24 rounded-full object-cover mb-3" loading="lazy" />
+          <blockquote class="italic text-textGray mb-2 px-4 sm:px-6">
+            “Passei no cursinho X graças ao EduQuest. As questões são muito próximas do ENEM real!”
+          </blockquote>
+          <footer class="font-semibold text-textWhite">— Júlia Santos, SP</footer>
+        </div>
+        <!-- Slide 2 -->
+        <div class="slide">
+          <img src="assets/images/depoimento2.jpg" alt="Estudante 2" class="h-20 w-20 sm:h-24 sm:w-24 rounded-full object-cover mb-3" loading="lazy" />
+          <blockquote class="italic text-textGray mb-2 px-4 sm:px-6">
+            “Meu streak chegou a 30 dias ininterruptos. Nunca gostei tanto de estudar!”
+          </blockquote>
+          <footer class="font-semibold text-textWhite">— Bruno Lima, RJ</footer>
+        </div>
+        <!-- Slide 3 -->
+        <div class="slide">
+          <img src="assets/images/depoimento3.jpg" alt="Estudante 3" class="h-20 w-20 sm:h-24 sm:w-24 rounded-full object-cover mb-3" loading="lazy" />
+          <blockquote class="italic text-textGray mb-2 px-4 sm:px-6">
+            “A gamificação faz toda a diferença. Conquistar badges me motiva a voltar todo dia.”
+          </blockquote>
+          <footer class="font-semibold text-textWhite">— Marina Alves, MG</footer>
+        </div>
+      </div>
+
+      <!-- Botões Next / Prev -->
+      <div class="flex justify-center space-x-6 mt-6">
+        <button id="prev-slide" class="bg-lightGray hover:bg-lightGray/80 text-textWhite p-2 sm:p-3 rounded-full transition-colors duration-300 scroll-anim delay-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <button id="next-slide" class="bg-lightGray hover:bg-lightGray/80 text-textWhite p-2 sm:p-3 rounded-full transition-colors duration-300 scroll-anim delay-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ======================================
+       7. DOWNLOAD (Botões textuais, mesmo tamanho) COM SLIDE-IN
+       ====================================== -->
+  <section id="download" class="py-16 md:py-20 lg:py-24 bg-darkGray/75 px-4">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading font-bold mb-4 text-textWhite scroll-anim" style="animation: slideInLeft 0.8s ease-out forwards;">Baixe o Aplicativo EduQuest</h2>
+      <p class="text-textGray text-sm sm:text-base md:text-lg mb-6 scroll-anim delay-200" style="animation: slideInRight 0.8s ease-out 0.2s forwards;">Disponível para Android e iOS. Escolha seu sistema e comece a estudar de forma gamificada!</p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 md:gap-8">
+        <!-- Botão Google Play (texto) -->
+        <a
+          href="https://play.google.com/store/apps/details?id=com.eduquest.app"
+          target="_blank"
+          class="w-48 h-12 bg-accentPurple text-textWhite flex items-center justify-center rounded-lg shadow-lg hover:bg-purple-700 transform hover:scale-105 transition-transform duration-300 scroll-anim delay-400"
+          style="animation: zoomIn 0.8s ease-out 0.4s forwards;"
+        >
+          <span class="text-base sm:text-lg font-semibold">Google Play</span>
+        </a>
+        <!-- Botão App Store (texto) -->
+        <a
+          href="https://apps.apple.com/br/app/eduquest/id1234567890"
+          target="_blank"
+          class="w-48 h-12 bg-accentPurple text-textWhite flex items-center justify-center rounded-lg shadow-lg hover:bg-purple-700 transform hover:scale-105 transition-transform duration-300 scroll-anim delay-600"
+          style="animation: zoomIn 0.8s ease-out 0.6s forwards;"
+        >
+          <span class="text-base sm:text-lg font-semibold">App Store</span>
+        </a>
+      </div>
+      <p class="text-textGray text-xs sm:text-sm md:text-base mt-4 scroll-anim delay-800" style="animation: fadeIn 0.8s ease-out 0.8s forwards;">
+        Ou baixe diretamente o APK (Android):
+        <a href="assets/downloads/eduquest.apk" class="text-accentPurple hover:underline">Baixar APK</a>
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ======================================
+       8. CONTATO
+       ====================================== -->
+  <section id="contato" class="py-16 md:py-20 lg:py-24 bg-blackBg/75 px-4">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-center mb-6 text-textWhite scroll-anim">Fale Conosco</h2>
+      <form action="https://seu-servidor-de-formulario.com/submit" method="POST" class="space-y-4 sm:space-y-6 scroll-anim delay-200">
+        <div>
+          <label for="nome" class="block text-textWhite font-medium mb-1">Nome</label>
+          <input type="text" id="nome" name="nome" required
+            class="w-full border border-lightGray rounded-lg bg-darkGray text-textWhite p-2 sm:p-3 focus:outline-none focus:ring-accentPurple focus:border-accentPurple transition-colors duration-300" />
+        </div>
+        <div>
+          <label for="email" class="block text-textWhite font-medium mb-1">E-mail</label>
+          <input type="email" id="email" name="email" required
+            class="w-full border border-lightGray rounded-lg bg-darkGray text-textWhite p-2 sm:p-3 focus:outline-none focus:ring-accentPurple focus:border-accentPurple transition-colors duration-300" />
+        </div>
+        <div>
+          <label for="assunto" class="block text-textWhite font-medium mb-1">Assunto</label>
+          <input type="text" id="assunto" name="assunto" required
+            class="w-full border border-lightGray rounded-lg bg-darkGray text-textWhite p-2 sm:p-3 focus:outline-none focus:ring-accentPurple focus:border-accentPurple transition-colors duration-300" />
+        </div>
+        <div>
+          <label for="mensagem" class="block text-textWhite font-medium mb-1">Mensagem</label>
+          <textarea id="mensagem" name="mensagem" rows="4" required
+            class="w-full border border-lightGray rounded-lg bg-darkGray text-textWhite p-2 sm:p-3 focus:outline-none focus:ring-accentPurple focus:border-accentPurple transition-colors duration-300"></textarea>
+        </div>
+        <button type="submit"
+          class="w-full bg-accentPurple text-textWhite font-semibold py-2 sm:py-3 rounded-lg shadow-lg hover:bg-purple-700 transform hover:scale-105 transition-transform duration-300 scroll-anim delay-400"
+        >
+          Enviar Mensagem
+        </button>
+      </form>
+
+      <!-- Informações de Suporte -->
+      <div class="mt-6 text-center text-textGray scroll-anim delay-600">
+        <p>E-mail de suporte: <a href="mailto:eduquest.oorg@gmail.com" class="text-accentPurple hover:underline">eduquest.oorg@gmail.com</a></p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ======================================
+       9. FOOTER
+       ====================================== -->
+  <footer class="bg-darkGray/75 text-textGray py-4 sm:py-6 lg:py-8 px-4 scroll-anim delay-600">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
+      <p class="text-xs sm:text-sm">&copy; 2025 EduQuest. Todos os direitos reservados.</p>
+      <div class="flex space-x-4 sm:space-x-6 mt-2 md:mt-0">
+        <a href="https://facebook.com/eduquest" target="_blank" class="hover:text-accentPurple transition-colors duration-300 text-sm sm:text-base">Facebook</a>
+        <a href="https://instagram.com/eduquest" target="_blank" class="hover:text-accentPurple transition-colors duration-300 text-sm sm:text-base">Instagram</a>
+        <a href="https://youtube.com/eduquest" target="_blank" class="hover:text-accentPurple transition-colors duration-300 text-sm sm:text-base">YouTube</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ======================================
+       10. SCRIPTS JAVASCRIPT
+       ====================================== -->
+  <script src="js/index.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // =====================
+      // Parallax Scroll para HERO
+      // =====================
+      const parallaxBg = document.getElementById('parallax-bg');
+      window.addEventListener('scroll', () => {
+        const offset = window.pageYOffset;
+        parallaxBg.style.transform = `translateY(${offset * 0.5}px)`;
+      });
+
+      // =====================
+      // Scroll-trigger para animações
+      // =====================
+      const scrollEls = document.querySelectorAll('.scroll-anim');
+      const scrollObs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            scrollObs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.2 });
+
+      scrollEls.forEach(el => scrollObs.observe(el));
+
+      // =====================
+      // Slider de Depoimentos
+      // =====================
+      const slides = document.querySelectorAll('.slide');
+      const prevBtn = document.getElementById('prev-slide');
+      const nextBtn = document.getElementById('next-slide');
+      let currentIndex = 0;
+
+      if (slides.length && prevBtn && nextBtn) {
+        slides.forEach((slide, i) => {
+          slide.classList.add('transition-opacity', 'duration-500');
+          slide.classList.remove('active');
+        });
+        slides[0].classList.add('active');
+
+        function showSlide(index) {
+          slides.forEach((slide, i) => {
+            if (i === index) {
+              slide.classList.add('active');
+            } else {
+              slide.classList.remove('active');
+            }
+          });
+        }
+
+        nextBtn.addEventListener('click', () => {
+          currentIndex = (currentIndex + 1) % slides.length;
+          showSlide(currentIndex);
+        });
+
+        prevBtn.addEventListener('click', () => {
+          currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+          showSlide(currentIndex);
+        });
+      }
+
+      // =====================
+      // Toggle do menu mobile
+      // =====================
+      const btnMobile = document.getElementById('btn-mobile-menu');
+      const mobileMenu = document.getElementById('mobile-menu');
+
+      if (btnMobile && mobileMenu) {
+        btnMobile.addEventListener('click', () => {
+          mobileMenu.classList.toggle('hidden');
+          if (!mobileMenu.classList.contains('hidden')) {
+            mobileMenu.classList.remove('opacity-0');
+            mobileMenu.classList.add('opacity-100');
+          } else {
+            mobileMenu.classList.remove('opacity-100');
+            mobileMenu.classList.add('opacity-0');
+          }
+        });
+        // Fecha o menu mobile ao clicar em qualquer link
+        mobileMenu.querySelectorAll('a').forEach((link) => {
+          link.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+          });
+        });
+      }
+    });
+  </script>
+</body>
+</html>
